@@ -2,7 +2,6 @@ package cn.chenfuduo.androidsourcereadingdemo.principle;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.LruCache;
 import android.widget.ImageView;
 
 import java.io.IOException;
@@ -17,7 +16,7 @@ import java.util.concurrent.Executors;
  */
 public class ImageLoader {
     //内存缓存
-    ImageCache mImageCache = new ImageCache();
+    ImageCache mImageCache = new MemoryCache();
     //SD卡缓存
     DiskCache mDiskCache = new DiskCache();
     //双缓存
@@ -29,20 +28,21 @@ public class ImageLoader {
     //线程池，线程数量为CPU的数量
     ExecutorService mExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
+    //注入缓存实现
+    public void setImageCache(ImageCache cache){
+        mImageCache = cache;
+    }
     public void displayImage(final String url, final ImageView imageView){
-        //判断使用哪种缓存
-        Bitmap bitmap = null;
-        if (isUseDoubleCache){
-            bitmap = mDoubleCache.get(url);
-        }else if (isUseDiskCache){
-            bitmap = mDiskCache.get(url);
-        }else{
-            bitmap = mImageCache.get(url);
-        }
+        Bitmap bitmap = mImageCache.get(url);
         if (bitmap != null){
             imageView.setImageBitmap(bitmap);
             return;
         }
+        //图片没缓存，提交到线程池中下载图片
+        submitLoadRequest(url, imageView);
+    }
+
+    private void submitLoadRequest(final String url, final ImageView imageView) {
         imageView.setTag(url);
         mExecutorService.submit(new Runnable() {
             @Override
@@ -58,6 +58,7 @@ public class ImageLoader {
             }
         });
     }
+
     public Bitmap downloadBitmap(String imageUrl){
         Bitmap bitmap = null;
         try {

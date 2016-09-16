@@ -1,10 +1,15 @@
 package cn.chenfuduo.androidsourcereadingdemo;
 
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import cn.chenfuduo.androidsourcereadingdemo.principle.DiskCache;
+import cn.chenfuduo.androidsourcereadingdemo.principle.DoubleCache;
+import cn.chenfuduo.androidsourcereadingdemo.principle.ImageCache;
 import cn.chenfuduo.androidsourcereadingdemo.principle.ImageLoader;
+import cn.chenfuduo.androidsourcereadingdemo.principle.MemoryCache;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,10 +26,22 @@ public class MainActivity extends AppCompatActivity {
 
         ImageLoader imageLoader = new ImageLoader();
         //使用SD卡缓存
-        imageLoader.useDiskCache(true);
+        imageLoader.setImageCache(new DiskCache());
         //使用内存缓存
-        //imageLoader.useDiskCache(false);
+        imageLoader.setImageCache(new MemoryCache());
         //使用双缓存
-        imageLoader.useDoubleCache(true);
+        imageLoader.setImageCache(new DoubleCache());
+        //使用自定义的图片缓存
+        imageLoader.setImageCache(new ImageCache() {
+            @Override
+            public Bitmap get(String url) {
+                return null;
+            }
+
+            @Override
+            public void put(String url, Bitmap bitmap) {
+
+            }
+        });
     }
 }
