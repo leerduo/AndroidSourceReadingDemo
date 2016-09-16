@@ -1,4 +1,4 @@
-package cn.chenfuduo.androidsourcereadingdemo.SRP;
+package cn.chenfuduo.androidsourcereadingdemo.principle;
 
 import android.graphics.Bitmap;
 import android.util.LruCache;
