@@ -21,21 +21,12 @@ public class ImageLoader {
     //线程池，线程数量为CPU的数量
     ExecutorService mExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    public ImageLoader() {
-        initImageCache();
-    }
-
-    private void initImageCache() {
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        final int cacheSize = maxMemory / 4;
-        mImageCache = new LruCache<String,Bitmap>(cacheSize){
-            @Override
-            protected int sizeOf(String key, Bitmap bitmap) {
-                return bitmap.getRowBytes() * bitmap.getHeight() / 1024;
-            }
-        };
-    }
     public void displayImage(final String url, final ImageView imageView){
+        Bitmap bitmap = mImageCache.get(url);
+        if (bitmap != null){
+            imageView.setImageBitmap(bitmap);
+            return;
+        }
         imageView.setTag(url);
         mExecutorService.submit(new Runnable() {
             @Override
